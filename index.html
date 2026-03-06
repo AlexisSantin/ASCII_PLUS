@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCII_PLUS — SVG ASCII-like en +</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --border: #d9dde3;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #111111;
+      --shadow: 0 10px 30px rgba(0,0,0,.06);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      padding: 18px;
+      position: sticky;
+      top: 20px;
+      align-self: start;
+    }
+
+    .main {
+      padding: 18px;
+      min-height: 70vh;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.3rem;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      background: #fafafa;
+      transition: .2s ease;
+      cursor: pointer;
+      margin-bottom: 14px;
+    }
+
+    .dropzone.dragover {
+      border-color: #111;
+      background: #f0f0f0;
+      transform: scale(1.01);
+    }
+
+    .dropzone strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .dropzone span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .btn,
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font: inherit;
+      transition: .15s ease;
+    }
+
+    .btn:hover,
+    button:hover {
+      transform: translateY(-1px);
+      border-color: #b8bec7;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .preview-image-wrap {
+      margin: 14px 0 18px;
+    }
+
+    .preview-image-wrap img {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: repeating-conic-gradient(#f1f1f1 0% 25%, #fff 0% 50%) 50% / 16px 16px;
+      object-fit: contain;
+      max-height: 220px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .control {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fcfcfd;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .control .value {
+      color: var(--muted);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .inline-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .color-box label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .meta {
+      margin-top: 14px;
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .meta strong {
+      color: var(--text);
+    }
+
+    .preview-shell {
+      width: 100%;
+      min-height: 420px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background:
+        linear-gradient(45deg, #f7f7f7 25%, transparent 25%),
+        linear-gradient(-45deg, #f7f7f7 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f7f7f7 75%),
+        linear-gradient(-45deg, transparent 75%, #f7f7f7 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #preview {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 420px;
+    }
+
+    #preview svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 78vh;
+    }
+
+    .placeholder {
+      padding: 32px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    canvas {
+      display: none;
+    }
+
+    @media (max-width: 920px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="panel sidebar">
+      <h1>ASCII_PLUS</h1>
+      <p class="subtitle">Transforme une image en art vectoriel SVG stylisé avec uniquement des « + ».</p>
+
+      <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Déposer une image ou cliquer pour choisir">
+        <strong>Glisser-déposer une image</strong>
+        <span>ou cliquez sur le bouton ci-dessous</span>
+      </div>
+
+      <div class="button-row">
+        <label class="btn primary" for="fileInput">Choisir une image</label>
+        <button id="downloadBtn" type="button">Télécharger SVG</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+
+      <input id="fileInput" type="file" accept="image/*" />
+
+      <div class="preview-image-wrap">
+        <img id="originalPreview" alt="Aperçu de l’image uploadée" hidden />
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label for="cellSize">
+            <span>Taille d’une cellule</span>
+            <span class="value" id="cellSizeValue">12 px</span>
+          </label>
+          <input id="cellSize" type="range" min="4" max="40" step="1" value="12" />
+        </div>
+
+        <div class="control">
+          <label for="gridStep">
+            <span>Densité / Pas de la grille</span>
+            <span class="value" id="gridStepValue">2</span>
+          </label>
+          <input id="gridStep" type="range" min="1" max="4" step="1" value="2" />
+        </div>
+
+        <div class="inline-two">
+          <div class="control color-box">
+            <label for="plusColor">Couleur des +</label>
+            <input id="plusColor" type="color" value="#000000" />
+          </div>
+          <div class="control color-box">
+            <label for="bgColor">Couleur de fond</label>
+            <input id="bgColor" type="color" value="#ffffff" />
+          </div>
+        </div>
+
+        <div class="control">
+          <label class="check" for="transparentBg">
+            <input id="transparentBg" type="checkbox" checked />
+            <span>Fond transparent</span>
+          </label>
+        </div>
+
+        <div class="control">
+          <label class="check" for="invert">
+            <input id="invert" type="checkbox" />
+            <span>Inverser (mode négatif)</span>
+          </label>
+        </div>
+
+        <div class="control">
+          <label for="threshold">
+            <span>Seuil de binarisation</span>
+            <span class="value" id="thresholdValue">128</span>
+          </label>
+          <input id="threshold" type="range" min="0" max="255" step="1" value="128" />
+        </div>
+      </div>
+
+      <div class="meta">
+        <div><strong>Dimensions SVG :</strong> <span id="svgSize">—</span></div>
+        <div><strong>Nombre de + :</strong> <span id="plusCount">0</span></div>
+        <div><strong>Temps de rendu :</strong> <span id="renderTime">—</span></div>
+      </div>
+    </aside>
+
+    <main class="panel main">
+      <div class="preview-shell">
+        <div id="preview">
+          <div class="placeholder">
+            Importez une image pour générer automatiquement un SVG « ASCII-like » en signes plus.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <canvas id="workCanvas"></canvas>
+
+  <script>
+    (() => {
+      const els = {
+        dropzone: document.getElementById('dropzone'),
+        fileInput: document.getElementById('fileInput'),
+        downloadBtn: document.getElementById('downloadBtn'),
+        resetBtn: document.getElementById('resetBtn'),
+        originalPreview: document.getElementById('originalPreview'),
+        preview: document.getElementById('preview'),
+        canvas: document.getElementById('workCanvas'),
+        cellSize: document.getElementById('cellSize'),
+        cellSizeValue: document.getElementById('cellSizeValue'),
+        gridStep: document.getElementById('gridStep'),
+        gridStepValue: document.getElementById('gridStepValue'),
+        plusColor: document.getElementById('plusColor'),
+        bgColor: document.getElementById('bgColor'),
+        transparentBg: document.getElementById('transparentBg'),
+        invert: document.getElementById('invert'),
+        threshold: document.getElementById('threshold'),
+        thresholdValue: document.getElementById('thresholdValue'),
+        plusCount: document.getElementById('plusCount'),
+        svgSize: document.getElementById('svgSize'),
+        renderTime: document.getElementById('renderTime')
+      };
+
+      const ctx = els.canvas.getContext('2d', { willReadFrequently: true });
+
+      const defaults = {
+        cellSize: 12,
+        gridStep: 2,
+        plusColor: '#000000',
+        bgColor: '#ffffff',
+        transparentBg: true,
+        invert: false,
+        threshold: 128
+      };
+
+      let currentImage = null;
+      let currentImageURL = null;
+      let currentSVG = '';
+      let scheduled = false;
+
+      function updateLabels() {
+        els.cellSizeValue.textContent = `${els.cellSize.value} px`;
+        els.gridStepValue.textContent = els.gridStep.value;
+        els.thresholdValue.textContent = els.threshold.value;
+      }
+
+      function resetUI() {
+        els.cellSize.value = defaults.cellSize;
+        els.gridStep.value = defaults.gridStep;
+        els.plusColor.value = defaults.plusColor;
+        els.bgColor.value = defaults.bgColor;
+        els.transparentBg.checked = defaults.transparentBg;
+        els.invert.checked = defaults.invert;
+        els.threshold.value = defaults.threshold;
+        updateLabels();
+        if (currentImage) scheduleRender();
+      }
+
+      function sanitizeFilename() {
+        return `ascii-plus-art-${Date.now()}.svg`;
+      }
+
+      function escapeXML(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/"/g, '&quot;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      }
+
+      function loadImageFromFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          if (currentImageURL) URL.revokeObjectURL(currentImageURL);
+          currentImageURL = url;
+          currentImage = img;
+          els.originalPreview.src = url;
+          els.originalPreview.hidden = false;
+          scheduleRender();
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          alert("Impossible de charger cette image.");
+        };
+        img.src = url;
+      }
+
+      function handleFiles(files) {
+        if (!files || !files.length) return;
+        loadImageFromFile(files[0]);
+      }
+
+      function computeCanvasSize(width, height, maxDim = 384) {
+        const scale = Math.min(1, maxDim / Math.max(width, height));
+        return {
+          width: Math.max(1, Math.round(width * scale)),
+          height: Math.max(1, Math.round(height * scale))
+        };
+      }
+
+      function getBrightness(r, g, b) {
+        return 0.299 * r + 0.587 * g + 0.114 * b;
+      }
+
+      function buildPlusPath(cx, cy, size, thickness) {
+        const half = size / 2;
+        const t = thickness / 2;
+
+        return [
+          `M ${cx - half} ${cy - t}`,
+          `L ${cx + half} ${cy - t}`,
+          `L ${cx + half} ${cy + t}`,
+          `L ${cx - half} ${cy + t}`,
+          'Z',
+          `M ${cx - t} ${cy - half}`,
+          `L ${cx + t} ${cy - half}`,
+          `L ${cx + t} ${cy + half}`,
+          `L ${cx - t} ${cy + half}`,
+          'Z'
+        ].join(' ');
+      }
+
+      function renderSVG() {
+        if (!currentImage) return;
+
+        const t0 = performance.now();
+
+        const cellSize = parseInt(els.cellSize.value, 10);
+        const gridStep = parseInt(els.gridStep.value, 10);
+        const plusColor = els.plusColor.value;
+        const bgColor = els.bgColor.value;
+        const invert = els.invert.checked;
+        const threshold = parseInt(els.threshold.value, 10);
+        const transparentBg = els.transparentBg.checked;
+
+        const scaled = computeCanvasSize(currentImage.naturalWidth, currentImage.naturalHeight, 384);
+        els.canvas.width = scaled.width;
+        els.canvas.height = scaled.height;
+
+        ctx.clearRect(0, 0, scaled.width, scaled.height);
+        ctx.drawImage(currentImage, 0, 0, scaled.width, scaled.height);
+
+        const imageData = ctx.getImageData(0, 0, scaled.width, scaled.height);
+        const data = imageData.data;
+
+        const mask = new Uint8Array(scaled.width * scaled.height);
+
+        for (let i = 0, px = 0; i < data.length; i += 4, px++) {
+          const alpha = data[i + 3] / 255;
+          const gray = getBrightness(data[i], data[i + 1], data[i + 2]);
+          const compositeGray = 255 - (255 - gray) * alpha;
+          mask[px] = compositeGray < threshold ? 1 : 0;
+        }
+
+        const pitch = cellSize * gridStep;
+        const cols = Math.max(1, Math.floor(scaled.width / pitch));
+        const rows = Math.max(1, Math.floor(scaled.height / pitch));
+        const svgWidth = cols * pitch;
+        const svgHeight = rows * pitch;
+
+        let plusCount = 0;
+        const pathParts = [];
+        const plusDrawSize = Math.max(2, cellSize * 0.9);
+        const plusThickness = Math.max(1, cellSize * 0.16);
+
+        for (let row = 0; row < rows; row++) {
+          const y0 = row * pitch;
+          const y1 = Math.min(y0 + pitch, scaled.height);
+
+          for (let col = 0; col < cols; col++) {
+            const x0 = col * pitch;
+            const x1 = Math.min(x0 + pitch, scaled.width);
+
+            let sum = 0;
+            let count = 0;
+
+            for (let y = y0; y < y1; y++) {
+              let idx = y * scaled.width + x0;
+              for (let x = x0; x < x1; x++, idx++) {
+                sum += mask[idx];
+                count++;
+              }
+            }
+
+            const filled = count > 0 ? (sum / count) >= 0.5 : false;
+            const shouldPlace = (!invert && filled) || (invert && !filled);
+
+            if (!shouldPlace) continue;
+
+            const cx = col * pitch + pitch / 2;
+            const cy = row * pitch + pitch / 2;
+            pathParts.push(buildPlusPath(cx, cy, plusDrawSize, plusThickness));
+            plusCount++;
+          }
+        }
+
+        const bgRect = transparentBg
+          ? ''
+          : `<rect width="${svgWidth}" height="${svgHeight}" fill="${escapeXML(bgColor)}"/>`;
+
+        currentSVG =
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" height="${svgHeight}" preserveAspectRatio="xMidYMid meet" shape-rendering="geometricPrecision">` +
+          bgRect +
+          `<path d="${pathParts.join(' ')}" fill="${escapeXML(plusColor)}" fill-rule="nonzero"/>` +
+          `</svg>`;
+
+        els.preview.innerHTML = currentSVG;
+        els.plusCount.textContent = plusCount.toLocaleString('fr-FR');
+        els.svgSize.textContent = `${svgWidth} × ${svgHeight} px`;
+
+        const t1 = performance.now();
+        els.renderTime.textContent = `${Math.round(t1 - t0)} ms`;
+      }
+
+      function scheduleRender() {
+        if (!currentImage || scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(() => {
+          scheduled = false;
+          renderSVG();
+        });
+      }
+
+      function downloadSVG() {
+        if (!currentSVG) {
+          alert("Aucun SVG à télécharger pour le moment.");
+          return;
+        }
+
+        const blob = new Blob([currentSVG], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = sanitizeFilename();
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      els.fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+      });
+
+      els.dropzone.addEventListener('click', () => els.fileInput.click());
+      els.dropzone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          els.fileInput.click();
+        }
+      });
+
+      ['dragenter', 'dragover'].forEach(type => {
+        els.dropzone.addEventListener(type, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          els.dropzone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(type => {
+        els.dropzone.addEventListener(type, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          els.dropzone.classList.remove('dragover');
+        });
+      });
+
+      els.dropzone.addEventListener('drop', (e) => {
+        handleFiles(e.dataTransfer.files);
+      });
+
+      [
+        els.cellSize,
+        els.gridStep,
+        els.plusColor,
+        els.bgColor,
+        els.transparentBg,
+        els.invert,
+        els.threshold
+      ].forEach(el => {
+        el.addEventListener('input', () => {
+          updateLabels();
+          scheduleRender();
+        });
+        el.addEventListener('change', () => {
+          updateLabels();
+          scheduleRender();
+        });
+      });
+
+      els.downloadBtn.addEventListener('click', downloadSVG);
+      els.resetBtn.addEventListener('click', resetUI);
+
+      updateLabels();
+    })();
+  </script>
+</body>
+</html>
